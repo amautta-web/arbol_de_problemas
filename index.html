@@ -1,0 +1,705 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Árbol de problemas y objetivos · PPEV Medellín</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+:root{
+  --ink:#16221f;
+  --ink-soft:#4d5c57;
+  --ink-faint:#8b9a94;
+  --paper:#e9ebe4;
+  --surface:#f7f8f4;
+  --rule:rgba(22,34,31,.14);
+  --neg:#8e2a2b;
+  --neg-wash:#f3e7e4;
+  --pos:#1e6e52;
+  --pos-wash:#e2eee7;
+  --trunk:#b8862f;
+  --accent:var(--neg);
+  --accent-wash:var(--neg-wash);
+  --gap:14px;
+  --dur:.55;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(rgba(22,34,31,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(22,34,31,.035) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+.wrap{max-width:1560px;margin:0 auto;padding:28px 22px 60px}
+
+/* ---------- header ---------- */
+header{border-bottom:1px solid var(--rule);padding-bottom:18px;margin-bottom:22px}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-faint);display:flex;gap:10px;align-items:center;flex-wrap:wrap
+}
+.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);transition:background .5s}
+h1{
+  font-family:"Newsreader",Georgia,serif;font-weight:300;
+  font-size:clamp(30px,4.4vw,54px);line-height:1.03;letter-spacing:-.015em;
+  margin:12px 0 0;max-width:19ch
+}
+h1 em{font-style:italic;color:var(--accent);transition:color .5s}
+.head-row{display:flex;gap:28px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.lede{max-width:46ch;color:var(--ink-soft);font-size:14px;margin:14px 0 0}
+
+/* ---------- polarity switch ---------- */
+.switch{
+  display:inline-flex;background:var(--surface);border:1px solid var(--rule);
+  border-radius:999px;padding:4px;position:relative;flex-shrink:0
+}
+.switch button{
+  position:relative;z-index:2;border:0;background:none;cursor:pointer;
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;
+  padding:10px 20px;border-radius:999px;color:var(--ink-faint);transition:color .35s;font-weight:500
+}
+.switch button[aria-pressed="true"]{color:var(--surface)}
+.switch .thumb{position:absolute;z-index:1;top:4px;left:4px;bottom:4px;border-radius:999px;background:var(--accent)}
+
+/* ---------- eje chips ---------- */
+.ejes{display:flex;gap:7px;flex-wrap:wrap;margin:22px 0 6px;align-items:center}
+.ejes .label{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-right:4px}
+.chip{
+  border:1px solid var(--rule);background:var(--surface);border-radius:999px;
+  padding:7px 13px 7px 10px;font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  color:var(--ink-soft);font-family:inherit;transition:border-color .25s,color .25s,background .25s
+}
+.chip .tick{width:7px;height:7px;border-radius:2px;background:var(--hue)}
+.chip:hover{border-color:var(--ink-faint);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.chip.reset{padding-left:13px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+
+/* ---------- board ---------- */
+.board{overflow-x:auto;padding-bottom:10px;margin-top:8px}
+.board-inner{min-width:1220px}
+.tier{margin-bottom:2px}
+.tier-head{display:flex;align-items:center;gap:12px;margin:20px 0 10px}
+.tier-code{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);letter-spacing:.1em;transition:color .5s}
+.tier-name{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.17em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap}
+.tier-head .rule{flex:1;height:1px;background:var(--rule)}
+.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:var(--gap);align-items:stretch}
+.cell{display:flex;flex-direction:column}
+
+/* connector */
+.link{height:22px;display:flex;justify-content:center;flex-shrink:0}
+.link i{width:1px;background:var(--rule);display:block;height:100%;transform-origin:top center}
+.link.down{order:2}
+
+/* ---------- card ---------- */
+.card{
+  position:relative;flex:1;text-align:left;width:100%;
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  padding:13px 14px 14px;cursor:pointer;font:inherit;color:inherit;
+  transition:border-color .25s,box-shadow .25s,transform .25s,background .4s;
+  transform-style:preserve-3d;backface-visibility:hidden
+}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--hue);opacity:.75}
+.card:hover{border-color:var(--ink-faint);box-shadow:0 8px 22px -14px rgba(22,34,31,.5);transform:translateY(-2px)}
+.card:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.card .code{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.09em;color:var(--accent);display:block;margin-bottom:6px;transition:color .5s}
+.card .txt{font-size:13.2px;line-height:1.42;color:var(--ink);display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.card.lvl-direct{background:var(--accent-wash);transition:background .5s,border-color .25s,box-shadow .25s,transform .25s}
+.card.lvl-direct .txt{font-size:13.6px;font-weight:500}
+.card.dim{opacity:.2;filter:saturate(.2)}
+.card.dim:hover{transform:none;box-shadow:none}
+
+/* ---------- trunk ---------- */
+.trunk{
+  position:relative;margin:26px 0;padding:26px 30px;border-radius:4px;
+  background:var(--ink);color:var(--surface);overflow:hidden
+}
+.trunk::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 180% at 12% 0%,rgba(184,134,47,.28),transparent 62%)
+}
+.trunk .tag{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--trunk);margin-bottom:12px;display:flex;align-items:center;gap:10px
+}
+.trunk .tag .bar{height:1px;flex:1;background:rgba(184,134,47,.35);transform-origin:left center}
+.trunk p{
+  margin:0;font-family:"Newsreader",Georgia,serif;font-weight:300;
+  font-size:clamp(20px,2.5vw,31px);line-height:1.24;max-width:34ch;position:relative;z-index:2
+}
+
+/* ---------- drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(22,34,31,.42);opacity:0;pointer-events:none;z-index:40}
+.scrim.on{pointer-events:auto}
+.drawer{
+  position:fixed;top:0;right:0;height:100%;width:min(470px,100%);z-index:50;
+  background:var(--surface);border-left:1px solid var(--rule);
+  transform:translateX(100%);display:flex;flex-direction:column;
+  box-shadow:-30px 0 60px -40px rgba(22,34,31,.7)
+}
+.drawer header{border:0;padding:24px 26px 16px;margin:0;border-bottom:1px solid var(--rule)}
+.drawer .close{
+  position:absolute;top:18px;right:20px;border:1px solid var(--rule);background:none;border-radius:999px;
+  width:32px;height:32px;cursor:pointer;color:var(--ink-soft);font-size:15px;line-height:1
+}
+.drawer .close:hover{border-color:var(--ink);color:var(--ink)}
+.d-code{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:var(--accent);transition:color .5s}
+.d-tier{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);margin-top:4px}
+.d-body{padding:22px 26px 40px;overflow-y:auto;flex:1}
+.d-body h3{
+  font-family:"Newsreader",Georgia,serif;font-weight:400;font-size:21px;line-height:1.3;margin:0 0 6px
+}
+.d-body .full{font-size:14.5px;line-height:1.55;color:var(--ink)}
+.d-eje{
+  display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:12.5px;color:var(--ink-soft);
+  border:1px solid var(--rule);border-radius:999px;padding:6px 12px
+}
+.d-eje .tick{width:7px;height:7px;border-radius:2px;background:var(--hue)}
+.chain{margin-top:26px;border-top:1px solid var(--rule);padding-top:20px}
+.chain h4{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px;font-weight:500}
+.step{display:grid;grid-template-columns:14px 1fr;gap:12px;padding-bottom:16px;position:relative}
+.step .marker{position:relative}
+.step .marker span{position:absolute;top:5px;left:3px;width:8px;height:8px;border-radius:50%;background:var(--accent);transition:background .5s}
+.step .marker::after{content:"";position:absolute;top:16px;left:6.5px;bottom:-8px;width:1px;background:var(--rule)}
+.step:last-child .marker::after{display:none}
+.step h5{margin:0 0 5px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);font-weight:500}
+.step ul{margin:0;padding-left:16px;font-size:13px;line-height:1.5;color:var(--ink)}
+.step li{margin-bottom:3px}
+.step p{margin:0;font-size:13px;line-height:1.5}
+
+/* ---------- pestañas de vista ---------- */
+.views{display:flex;gap:26px;align-items:center;margin:24px 0 2px;border-bottom:1px solid var(--rule);position:relative}
+.views button{
+  border:0;background:none;cursor:pointer;font:inherit;padding:0 0 12px;color:var(--ink-faint);
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;
+  transition:color .3s;font-weight:500
+}
+.views button[aria-selected="true"]{color:var(--ink)}
+.views .underline{position:absolute;bottom:-1px;left:0;height:2px;background:var(--accent);transition:background .5s}
+
+/* ---------- cadena de valor ---------- */
+#chainview{display:none}
+.cv-legend{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--gap);margin:26px 0 6px;padding-left:0}
+.cv-legend div{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);display:flex;align-items:center;gap:9px}
+.cv-legend div::before{content:attr(data-n);color:var(--accent);transition:color .5s}
+.cv-eje{border-top:1px solid var(--rule);padding:26px 0 30px;transition:opacity .35s,filter .35s}
+.cv-eje.dim{opacity:.18;filter:saturate(.15)}
+.cv-top{display:flex;gap:18px;align-items:baseline;margin-bottom:14px;flex-wrap:wrap}
+.cv-num{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--hue);flex-shrink:0}
+.cv-name{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;flex-shrink:0}
+.cv-obj{
+  font-family:"Newsreader",Georgia,serif;font-weight:300;font-size:clamp(16px,1.5vw,20.5px);
+  line-height:1.4;max-width:88ch;margin:0 0 22px;color:var(--ink)
+}
+.cv-obj::first-line{color:var(--ink)}
+.cv-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--gap);align-items:stretch;position:relative}
+.cv-box{
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:14px 15px 15px;position:relative;
+  transition:border-color .25s,box-shadow .25s,transform .25s
+}
+.cv-box:hover{border-color:var(--ink-faint);box-shadow:0 8px 22px -14px rgba(22,34,31,.5);transform:translateY(-2px)}
+.cv-box::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--hue);opacity:.7}
+.cv-box.end{background:var(--accent-wash);transition:background .5s,border-color .25s,box-shadow .25s,transform .25s}
+.cv-box h6{
+  margin:0 0 9px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-soft);font-weight:500
+}
+.cv-box ul{margin:0;padding-left:15px;font-size:12.6px;line-height:1.45}
+.cv-box li{margin-bottom:5px}
+.cv-box p{margin:0;font-size:13px;line-height:1.48}
+.cv-arrow{
+  position:absolute;top:50%;width:14px;height:14px;margin-top:-7px;z-index:3;
+  color:var(--ink-faint);display:flex;align-items:center;justify-content:center;
+  background:var(--paper);border-radius:50%
+}
+.cv-arrow svg{width:9px;height:9px;display:block}
+@media (max-width:900px){
+  .cv-legend{display:none}
+  .cv-flow{grid-template-columns:1fr}
+  .cv-arrow{display:none}
+}
+footer{margin-top:38px;padding-top:16px;border-top:1px solid var(--rule);font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.hint{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-top:14px}
+
+@media (max-width:760px){
+  .wrap{padding:20px 14px 40px}
+  .head-row{align-items:flex-start}
+  .trunk{padding:20px 18px}
+}
+@media print{
+  body{background:#fff}
+  .switch,.ejes,.hint,.scrim,.drawer,.views{display:none!important}
+  .board{overflow:visible}
+  .card,.cv-eje,.cv-box{break-inside:avoid}
+  .cv-arrow{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="head-row">
+      <div>
+        <div class="eyebrow"><span class="dot"></span><span>Alcaldía de Medellín</span><span>·</span><span>PPEV</span><span>·</span><span>25 jul 2026</span></div>
+        <h1>Árbol de <em id="h1word">problemas</em> del envejecimiento y la vejez</h1>
+        <p class="lede" id="lede">Estructura causal de la actualización de la Política Pública de Envejecimiento y Vejez. Seis ejes, de la causa raíz al efecto último.</p>
+      </div>
+      <div class="switch" id="switch">
+        <div class="thumb" id="thumb"></div>
+        <button data-mode="p" aria-pressed="true">Problemas</button>
+        <button data-mode="o" aria-pressed="false">Objetivos</button>
+      </div>
+    </div>
+    <div class="ejes" id="ejes"><span class="label">Ejes</span></div>
+    <div class="hint">El filtro por eje actúa sobre las dos vistas · Clic en cualquier tarjeta del árbol para ver su texto completo</div>
+  </header>
+
+  <div class="views" role="tablist" id="views">
+    <span class="underline" id="vline"></span>
+    <button role="tab" data-view="tree" aria-selected="true">Árbol</button>
+    <button role="tab" data-view="chain" aria-selected="false">Cadena de valor</button>
+  </div>
+
+  <div id="treeview">
+    <div class="board"><div class="board-inner" id="board"></div></div>
+  </div>
+
+  <div id="chainview">
+    <div class="cv-legend">
+      <div data-n="01">Insumos</div><div data-n="02">Actividades</div><div data-n="03">Productos</div>
+      <div data-n="04">Resultados · mediano plazo</div><div data-n="05">Impactos · largo plazo</div>
+    </div>
+    <div id="cvbody"></div>
+  </div>
+
+  <footer>
+    <span>Fuente: Árbol de problemas y objetivos · Cadena de valor PPEV–EAPS</span>
+    <span id="count"></span>
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+  <header>
+    <button class="close" id="close" aria-label="Cerrar">✕</button>
+    <div class="d-code" id="dCode"></div>
+    <div class="d-tier" id="dTier"></div>
+  </header>
+  <div class="d-body">
+    <h3 id="dTitle"></h3>
+    <div class="full" id="dFull"></div>
+    <div class="d-eje" id="dEje"><span class="tick"></span><span id="dEjeName"></span></div>
+    <div class="chain" id="chain"></div>
+  </div>
+</aside>
+
+<script>
+/* ============ DATOS ============ */
+const EJES = [
+  {n:1, name:"Autonomía económica",            hue:"#8a6d1f"},
+  {n:2, name:"Participación comunitaria",      hue:"#2f5f6e"},
+  {n:3, name:"Prevención de violencias",       hue:"#7b3550"},
+  {n:4, name:"Salud y cuidado en la vejez",    hue:"#3b6b3e"},
+  {n:5, name:"Envejecimiento saludable",       hue:"#5a4a7a"},
+  {n:6, name:"Gestión del conocimiento",       hue:"#8a5228"}
+];
+
+const CENTER = {
+  p:"Persistencia de brechas de protección, económicas y de cuidado que disminuyen el envejecimiento digno y saludable de las personas mayores en Medellín.",
+  o:"Mejorar la protección, la economía y el cuidado para favorecer un envejecimiento digno y saludable de las personas mayores en Medellín."
+};
+
+const TIERS = [
+  {id:"i-up", num:"05", p:"Efectos indirectos", o:"Fines indirectos"},
+  {id:"d-up", num:"04", p:"Efectos directos",   o:"Fines directos"},
+  {id:"d-dn", num:"02", p:"Causas directas",    o:"Medios directos"},
+  {id:"i-dn", num:"01", p:"Causas indirectas",  o:"Medios indirectos"}
+];
+
+const NODES = [
+/* ---- efectos / fines indirectos ---- */
+{t:"i-up",e:1,c:"1",pc:"E.I.1.1",oc:"F.I.1.1",
+ p:"Incremento de la pobreza y las desigualdades en las personas mayores.",
+ o:"Reducción de la pobreza y las desigualdades en las personas mayores."},
+{t:"i-up",e:2,c:"2",pc:"E.I.2.1",oc:"F.I.2.1",
+ p:"Falta de reconocimiento del aporte de las personas mayores en los espacios de participación, que aumenta su aislamiento social, genera deterioro de la salud mental y cognitiva y conlleva la pérdida de capital social al desaprovechar su experiencia y conocimientos.",
+ o:"Disminución de la soledad no deseada."},
+{t:"i-up",e:2,c:"3",pc:"E.I.2.2",oc:"F.I.2.2",
+ p:"Limitado ejercicio efectivo de los derechos a la participación, el reconocimiento y la incidencia social de las personas mayores.",
+ o:"Mayor reconocimiento del aporte social de las personas mayores."},
+{t:"i-up",e:3,c:"4",pc:"E.I.3.1",oc:"F.I.3.1",
+ p:"Revictimización, normalización, fragmentación institucional y subregistro de las violencias contra las personas mayores.",
+ o:"Personas mayores protegidas frente a las diferentes formas de violencia, abandono y vulneración de derechos."},
+{t:"i-up",e:4,c:"5",pc:"E.I.4.1",oc:"F.I.4.1",
+ p:"Incremento de la demanda y la presión sobre los sistemas de salud, cuidado y protección social; aumento de desigualdades y sobrecarga en las familias y redes de apoyo.",
+ o:"Menor presión sobre los sistemas de salud, cuidado y protección; disminución de la soledad no deseada y fortalecimiento de la salud mental."},
+{t:"i-up",e:5,c:"6",pc:"E.I.5.1",oc:"F.I.5.1",
+ p:"Incremento de la soledad no deseada y deterioro de la salud mental. Sobrecarga física, emocional y económica en las familias y redes de apoyo y cuidado.",
+ o:"Familias y redes de apoyo fortalecidas, corresponsables y con alivio de la sobrecarga física, emocional y económica."},
+{t:"i-up",e:6,c:"7",pc:"E.I.6.1",oc:"F.I.6.1",
+ p:"Poco conocimiento y formación para responder a los retos del envejecimiento y la vejez.",
+ o:"Mayor capacidad técnica, académica e institucional para responder a los retos del envejecimiento y la vejez, con talento humano, investigación y gestión del conocimiento fortalecidos para decisiones basadas en evidencia."},
+{t:"i-up",e:6,c:"8",pc:"E.I.6.2",oc:"F.I.6.2",
+ p:"Exclusión de espacios productivos, laborales y comunitarios; limitación en el acceso a servicios de salud, aislamiento social y restricción de sus derechos.",
+ o:"Mayor inclusión social y digital de las personas mayores."},
+
+/* ---- efectos / fines directos ---- */
+{t:"d-up",e:1,c:"1",pc:"E.D.1",oc:"F.D.1",
+ p:"Carencia de recursos para el acceso a bienes, servicios y condiciones básicas para una vida digna. Pérdida de autonomía y dignidad.",
+ o:"Mayor acceso a bienes y servicios para una vida digna. Mayor autonomía y dignidad económica."},
+{t:"d-up",e:2,c:"2 / span 2",pc:"E.D.2",oc:"F.D.2",
+ p:"Debilitamiento de la integración social de las personas mayores en la toma de decisiones y en los escenarios de participación.",
+ o:"Mayor integración e incidencia social."},
+{t:"d-up",e:3,c:"4",pc:"E.D.3",oc:"F.D.3",
+ p:"Incremento de las violencias física, psicológica y económica, y aumento de las situaciones de abandono en la vejez.",
+ o:"Disminución de las violencias y del abandono en la vejez."},
+{t:"d-up",e:4,c:"5",pc:"E.D.4",oc:"F.D.4",
+ p:"Deterioro de las condiciones de salud, incremento de las necesidades de cuidado y pérdida de independencia de las personas mayores.",
+ o:"Mejores condiciones de salud y bienestar de las personas mayores."},
+{t:"d-up",e:5,c:"6",pc:"E.D.5",oc:"F.D.5",
+ p:"Baja adopción y sostenibilidad de prácticas y hábitos de vida saludables en el envejecimiento y la vejez.",
+ o:"Adopción sostenida de hábitos saludables en el envejecimiento y la vejez."},
+{t:"d-up",e:6,c:"7",pc:"E.D.6.1",oc:"F.D.6.1",
+ p:"Insuficiente formación de profesionales capacitados e investigación especializada en envejecimiento y vejez.",
+ o:"Mayor desarrollo de capacidades y conocimiento en envejecimiento y vejez."},
+{t:"d-up",e:6,c:"8",pc:"E.D.6.2",oc:"F.D.6.2",
+ p:"Brecha digital y limitada inclusión de las personas mayores en entornos digitales y tecnológicos; aumento de la exclusión digital.",
+ o:"Inclusión digital de las personas mayores."},
+
+/* ---- causas / medios directos ---- */
+{t:"d-dn",e:1,c:"1",pc:"C.D.1",oc:"M.D.1",
+ p:"Limitado acceso a oportunidades económicas y productivas en la vejez.",
+ o:"Fortalecimiento del acceso a oportunidades económicas y productivas."},
+{t:"d-dn",e:2,c:"2 / span 2",pc:"C.D.2",oc:"M.D.2",
+ p:"Baja incidencia en la participación social, comunitaria y ciudadana en la vejez.",
+ o:"Incremento de la participación e incidencia social."},
+{t:"d-dn",e:3,c:"4",pc:"C.D.3",oc:"M.D.3",
+ p:"Deterioro de las relaciones familiares y limitadas redes de apoyo, que derivan en violencias sociofamiliares e institucionales contra las personas mayores.",
+ o:"Fortalecimiento de las relaciones familiares y de las redes de apoyo y cuidado."},
+{t:"d-dn",e:4,c:"5",pc:"C.D.4",oc:"M.D.4",
+ p:"Insuficientes acciones de promoción de la salud, prevención de la enfermedad y corresponsabilidad en el cuidado de las personas mayores.",
+ o:"Fortalecimiento de la promoción de la salud, la prevención y la corresponsabilidad del cuidado."},
+{t:"d-dn",e:5,c:"6",pc:"C.D.5",oc:"M.D.5",
+ p:"Baja efectividad de las intervenciones dirigidas a promover el envejecimiento saludable y a fortalecer la autonomía de las personas mayores.",
+ o:"Mejora de las intervenciones de envejecimiento saludable y de la autonomía."},
+{t:"d-dn",e:6,c:"7 / span 2",pc:"C.D.6",oc:"M.D.6",
+ p:"Limitada oferta y desarrollo de capacidades en formación, investigación y gestión del conocimiento sobre el envejecimiento y la vejez.",
+ o:"Fortalecimiento de la formación, la investigación y la gestión del conocimiento."},
+
+/* ---- causas / medios indirectos ---- */
+{t:"i-dn",e:1,c:"1",pc:"C.I.1.1",oc:"M.I.1.1",
+ p:"Desigualdades socioeconómicas acumuladas a lo largo del curso de vida y brechas de inequidad entre lo urbano y lo rural.",
+ o:"Disminución de las desigualdades socioeconómicas acumuladas."},
+{t:"i-dn",e:2,c:"2",pc:"C.I.2.1",oc:"M.I.2.1",
+ p:"Débil articulación de los mecanismos e instancias de participación de las personas mayores.",
+ o:"Fortalecimiento de los mecanismos de participación."},
+{t:"i-dn",e:2,c:"3",pc:"C.I.2.2",oc:"M.I.2.2",
+ p:"Prácticas, estereotipos y prejuicios edadistas en los ámbitos institucional, comunitario y cultural, que deslegitiman la voz de las personas mayores y restringen su incidencia real en los espacios de participación, limitando el reconocimiento social y el ejercicio pleno de sus derechos.",
+ o:"Transformación de las prácticas edadistas."},
+{t:"i-dn",e:3,c:"4",pc:"C.I.3.1",oc:"M.I.3.1",
+ p:"Débil implementación y seguimiento de las rutas de atención frente a las violencias contra las personas mayores.",
+ o:"Fortalecimiento de las rutas de atención frente a las violencias."},
+{t:"i-dn",e:4,c:"5",pc:"C.I.4.1",oc:"M.I.4.1",
+ p:"Limitada capacidad para responder de manera oportuna a las necesidades de salud y cuidado en la vejez.",
+ o:"Mayor capacidad de respuesta institucional en salud y cuidado."},
+{t:"i-dn",e:5,c:"6",pc:"C.I.5.1",oc:"M.I.5.1",
+ p:"Limitada capacidad de gobernanza y corresponsabilidad territorial para coordinar acciones entre actores públicos, privados, comunitarios y familiares en torno al envejecimiento y la vejez saludable.",
+ o:"Mayor gobernanza y corresponsabilidad territorial en torno al envejecimiento y la vejez saludable."},
+{t:"i-dn",e:6,c:"7 / span 2",pc:"C.I.6.1",oc:"M.I.6.1",
+ p:"Limitada priorización e incorporación del envejecimiento y la vejez en los procesos formativos, investigativos y de gestión del conocimiento.",
+ o:"Incorporación del envejecimiento y la vejez en la formación y la investigación."}
+];
+
+/* ---- cadena de valor por eje (hoja 3) ---- */
+const CADENA = {
+1:{obj:"Impulsar el acceso de las personas mayores a oportunidades económicas y productivas que fortalezcan su autonomía y calidad de vida, mediante estrategias de inclusión laboral y generación de ingresos en el Distrito de Medellín.",
+ ins:["Personal contratista","Articulación de oferta y alianzas","Espacios de formación","Recursos financieros","Oferta actualizada"],
+ act:["Formación para el trabajo","Capacitación en unidades productivas","Focalización de apoyos y créditos","Articulación intersectorial","Intermediación laboral","Plan sello amigable"],
+ pro:["Personas mayores formadas (étnicas, discapacidad, género)","Unidades productivas consolidadas","Personas beneficiadas","Oportunidad laboral acercada","Estrategia de reconocimiento a organizaciones promotoras de inclusión laboral (sello amigable, Ley 2040 de 2020)"],
+ res:"Personas mayores con oportunidades económicas y productivas.",
+ imp:"Disminución de la pobreza y las desigualdades en las personas mayores."},
+2:{obj:"Fomentar la participación social, comunitaria y ciudadana de las personas mayores, promoviendo su incidencia, organización, liderazgo y reconocimiento en los territorios.",
+ ins:["Escenarios y mecanismos de participación","Talento humano","Recursos financieros"],
+ act:["Fortalecimiento y acompañamiento a escenarios de participación","Plan de ajuste a los escenarios de participación","Formación en liderazgo y participación ciudadana","Articulación con instancias de participación","Sensibilización y formación a redes comunitarias"],
+ pro:["Escenarios de participación fortalecidos y acompañados","Estrategias de participación implementadas","Personas mayores vinculadas a procesos organizativos y formadas en liderazgo","Jornadas comunitarias desarrolladas","Estrategias de fortalecimiento organizativo implementadas","Redes sensibilizadas"],
+ res:"Personas mayores con incidencia participativa. Índice de participación ciudadana de personas mayores.",
+ imp:"Personas mayores que participan en las decisiones de la sociedad."},
+3:{obj:"Fortalecer la protección integral de las personas mayores mediante acciones de prevención, atención y seguimiento frente a las violencias, el abandono, la discriminación y la vulneración de derechos, a través de entornos protectores y redes de apoyo familiares, comunitarias e institucionales.",
+ ins:["Talento humano y entidades públicas y privadas","Guías y rutas de atención","Sistemas de información","Alianzas comunitarias, institucionales y familiares","Capacidad instalada para la atención y legislación"],
+ act:["Formación al talento humano en guías y rutas de atención","Coordinación interinstitucional para el cumplimiento de las rutas","Sistemas de información interoperables","Fortalecimiento de redes de apoyo sociales, familiares y comunitarias","Seguimiento a entidades que prestan servicios a personas mayores","Plan para el buen trato: sensibilización, acompañamiento psicosocial y orientación jurídica"],
+ pro:["Guías y rutas de atención operando","Estrategias de prevención y denuncia implementadas","Personas mayores atendidas","Redes familiares, comunitarias y sociales acompañadas","Encuentros intergeneracionales realizados","Sistema de información y seguimiento de violencias","Servicio de acompañamiento psicosocial y jurídico"],
+ res:"Familias, comunidades e instituciones formadas para el acompañamiento, cuidado y protección de las personas mayores.",
+ imp:"Mayor protección integral y fortalecimiento de entornos seguros para las personas mayores."},
+4:{obj:"Fortalecer las acciones de promoción de la salud, prevención de la enfermedad, atención a la dependencia y cuidado integral de las personas mayores, impulsando la corresponsabilidad social y condiciones que favorezcan el bienestar, la autonomía, la funcionalidad y el envejecimiento saludable.",
+ ins:["Programas de promoción de la salud y prevención de la enfermedad","Sistema del cuidado","Oferta institucional"],
+ act:["Plan de promoción de la salud, prevención de la enfermedad y fortalecimiento del cuidado","Jornadas de promoción y prevención enfocadas en personas mayores","Procesos formativos sobre cuidado y autocuidado","Fortalecimiento de redes de cuidado"],
+ pro:["Estrategias de promoción de la salud implementadas","Acciones de prevención de la enfermedad desarrolladas","Personas formadas en cuidado y autocuidado"],
+ res:"Personas mayores que acceden a estrategias de promoción de la salud y cuidado. Mejor capacidad de respuesta frente a necesidades de salud y cuidado.",
+ imp:"Salud y cuidado integral en las personas mayores."},
+5:{obj:"Articular la acción institucional, comunitaria e intersectorial para el desarrollo de intervenciones integrales, sostenidas y pertinentes orientadas al envejecimiento saludable, la autonomía y el bienestar de las personas mayores.",
+ ins:["Oferta institucional e intersectorial","Equipamientos y entornos saludables","Talento humano"],
+ act:["Plan de articulación institucional e intersectorial (capacidades institucionales, entornos amigables)","Estrategias de actividad física, deporte y recreación en el curso de vida","Estrategias de hábitos, modos y estilos de vida saludables"],
+ pro:["Plan de articulación institucional e intersectorial implementado","Estrategias de actividad física, deporte y recreación desarrolladas","Estrategias de hábitos y estilos de vida saludables desarrolladas","Estrategia intersectorial para entornos amigables con las personas mayores"],
+ res:"Mayor coordinación institucional para el envejecimiento saludable y la autonomía.",
+ imp:"Autonomía y calidad de vida en la vejez."},
+6:{obj:"Promover la articulación de procesos de formación, investigación, innovación y gestión del conocimiento sobre envejecimiento y vejez, para el fortalecimiento de capacidades institucionales, técnicas, comunitarias y digitales frente a los retos del envejecimiento poblacional.",
+ ins:["Academia","Observatorios de políticas públicas","Secretaría de Innovación Digital","Ruta N","Sapiencia"],
+ act:["Procesos formativos","Investigaciones","Alfabetización digital","Encuentros académicos","Producción de información","Fortalecimiento técnico","Gestión del observatorio"],
+ pro:["Procesos formativos desarrollados","Investigaciones realizadas","Personas mayores formadas en alfabetización digital","Estrategias de alfabetización digital implementadas","Publicaciones y documentos de conocimiento","Sistema de información y observatorio fortalecido","Encuentros académicos y de transferencia realizados"],
+ res:"Fortalecimiento de capacidades técnicas, formativas, investigativas y digitales frente al envejecimiento y la vejez.",
+ imp:"Capacidad institucional para responder a los desafíos del envejecimiento y la vejez."}
+};
+
+/* ============ RENDER ============ */
+const RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const D = RM ? 0.001 : 1;
+let mode = "p", focus = null;
+const board = document.getElementById("board");
+const ejeOf = n => EJES[n-1];
+
+function tierBlock(t){
+  const sec = document.createElement("section");
+  sec.className = "tier"; sec.dataset.tier = t.id;
+  sec.innerHTML = `<div class="tier-head"><span class="tier-code">${t.num}</span><span class="tier-name" data-p="${t.p}" data-o="${t.o}">${t.p}</span><span class="rule"></span></div><div class="grid"></div>`;
+  const grid = sec.querySelector(".grid");
+  NODES.filter(n=>n.t===t.id).forEach(n=>{
+    const cell = document.createElement("div");
+    cell.className = "cell"; cell.style.gridColumn = n.c; cell.dataset.eje = n.e;
+    const up = t.id.endsWith("dn");           // las capas inferiores conectan hacia arriba
+    const link = `<div class="link ${up?"":"down"}"><i></i></div>`;
+    const lvl = t.id.startsWith("d") ? "lvl-direct" : "";
+    cell.innerHTML = (up?"":"") + `<button class="card ${lvl}" style="--hue:${ejeOf(n.e).hue}">
+        <span class="code">${n.pc}</span><span class="txt">${n.p}</span></button>` + link;
+    if(up) cell.insertBefore(cell.lastElementChild, cell.firstElementChild);
+    cell.querySelector(".card").addEventListener("click", ()=>openDrawer(n));
+    cell._node = n;
+    grid.appendChild(cell);
+  });
+  return sec;
+}
+
+board.appendChild(tierBlock(TIERS[0]));
+board.appendChild(tierBlock(TIERS[1]));
+const trunk = document.createElement("div");
+trunk.className = "trunk";
+trunk.innerHTML = `<div class="tag"><span id="trunkTag">Problema central</span><span class="bar"></span><span>03</span></div><p id="trunkTxt">${CENTER.p}</p>`;
+board.appendChild(trunk);
+board.appendChild(tierBlock(TIERS[2]));
+board.appendChild(tierBlock(TIERS[3]));
+
+document.getElementById("count").textContent = NODES.length + " nodos · 6 ejes · 5 niveles";
+
+/* chips de eje */
+const ejesBar = document.getElementById("ejes");
+EJES.forEach(e=>{
+  const b = document.createElement("button");
+  b.className="chip"; b.style.setProperty("--hue",e.hue); b.setAttribute("aria-pressed","false");
+  b.innerHTML = `<span class="tick"></span>${e.n}. ${e.name}`;
+  b.addEventListener("click", ()=>setFocus(focus===e.n?null:e.n));
+  b._eje = e.n; ejesBar.appendChild(b);
+});
+const resetBtn = document.createElement("button");
+resetBtn.className="chip reset"; resetBtn.textContent="Ver todos";
+resetBtn.addEventListener("click", ()=>setFocus(null));
+ejesBar.appendChild(resetBtn);
+
+function setFocus(n){
+  focus = n;
+  ejesBar.querySelectorAll(".chip[aria-pressed]").forEach(c=>c.setAttribute("aria-pressed", String(c._eje===n)));
+  document.querySelectorAll(".cell").forEach(cell=>{
+    const on = !n || +cell.dataset.eje === n;
+    cell.querySelector(".card").classList.toggle("dim", !on);
+    gsap.to(cell.querySelector(".link i"), {opacity:on?1:.15, duration:.35*D});
+  });
+  document.querySelectorAll(".cv-eje").forEach(s=>{
+    s.classList.toggle("dim", !(!n || +s.dataset.eje === n));
+  });
+}
+
+/* ============ SWITCH DE POLARIDAD ============ */
+const thumb = document.getElementById("thumb");
+const swBtns = [...document.querySelectorAll("#switch button")];
+function placeThumb(){
+  const b = swBtns.find(x=>x.getAttribute("aria-pressed")==="true");
+  gsap.set(thumb,{width:b.offsetWidth,x:b.offsetLeft-4});
+}
+window.addEventListener("resize", placeThumb);
+
+swBtns.forEach(b=>b.addEventListener("click", ()=>{
+  if(b.dataset.mode===mode) return;
+  mode = b.dataset.mode;
+  swBtns.forEach(x=>x.setAttribute("aria-pressed", String(x.dataset.mode===mode)));
+  const target = swBtns.find(x=>x.dataset.mode===mode);
+  gsap.to(thumb,{width:target.offsetWidth, x:target.offsetLeft-4, duration:.45*D, ease:"power3.inOut"});
+  flip();
+}));
+
+function paint(){
+  const neg = mode==="p";
+  document.documentElement.style.setProperty("--accent", neg?"var(--neg)":"var(--pos)");
+  document.documentElement.style.setProperty("--accent-wash", neg?"var(--neg-wash)":"var(--pos-wash)");
+  document.getElementById("h1word").textContent = neg?"problemas":"objetivos";
+  document.getElementById("lede").textContent = neg
+    ? "Estructura causal de la actualización de la Política Pública de Envejecimiento y Vejez. Seis ejes, de la causa raíz al efecto último."
+    : "El mismo árbol en positivo: cada causa se convierte en un medio y cada efecto en un fin. Seis ejes, del medio raíz al fin último.";
+  document.getElementById("trunkTag").textContent = neg?"Problema central":"Objetivo general";
+  document.querySelectorAll(".tier-name").forEach(el=>{ el.textContent = neg?el.dataset.p:el.dataset.o; });
+}
+
+function flip(){
+  const cells = [...document.querySelectorAll(".cell")];
+  const tl = gsap.timeline();
+  tl.to(cells.map(c=>c.querySelector(".card")), {
+    rotationX:-92, opacity:.15, duration:.34*D, ease:"power2.in",
+    stagger:{each:.028*D, from:"start", grid:"auto"},
+    onStart:()=>{ gsap.set(cells.map(c=>c.querySelector(".card")),{transformPerspective:900}); }
+  });
+  tl.add(()=>{
+    cells.forEach(c=>{
+      const n=c._node, card=c.querySelector(".card");
+      card.querySelector(".code").textContent = mode==="p"?n.pc:n.oc;
+      card.querySelector(".txt").textContent  = mode==="p"?n.p:n.o;
+    });
+    document.getElementById("trunkTxt").textContent = mode==="p"?CENTER.p:CENTER.o;
+    paint();
+  }, "-=0.05");
+  tl.fromTo(cells.map(c=>c.querySelector(".card")), {rotationX:92, opacity:.15},
+    {rotationX:0, opacity:1, duration:.5*D, ease:"power3.out", stagger:{each:.028*D}});
+  tl.fromTo("#trunkTxt", {y:14,opacity:0},{y:0,opacity:1,duration:.5*D,ease:"power3.out"}, "-=0.55");
+}
+
+/* ============ DRAWER ============ */
+const drawer=document.getElementById("drawer"), scrim=document.getElementById("scrim");
+let drawerOpen=false, lastFocused=null;
+
+function openDrawer(n){
+  lastFocused=document.activeElement;
+  const e=ejeOf(n.e), cv=CADENA[n.e];
+  document.getElementById("dCode").textContent = mode==="p"?n.pc:n.oc;
+  const t=TIERS.find(x=>x.id===n.t);
+  document.getElementById("dTier").textContent = mode==="p"?t.p:t.o;
+  document.getElementById("dTitle").textContent = "";
+  document.getElementById("dFull").textContent = mode==="p"?n.p:n.o;
+  document.getElementById("dEje").style.setProperty("--hue", e.hue);
+  document.getElementById("dEjeName").textContent = `Eje ${e.n} · ${e.name}`;
+  const li = a => a.map(x=>`<li>${x}</li>`).join("");
+  document.getElementById("chain").innerHTML = `
+    <h4>Cadena de valor del eje</h4>
+    <div class="step"><div class="marker"><span></span></div><div><h5>Objetivo específico</h5><p>${cv.obj}</p></div></div>
+    <div class="step"><div class="marker"><span></span></div><div><h5>Insumos</h5><ul>${li(cv.ins)}</ul></div></div>
+    <div class="step"><div class="marker"><span></span></div><div><h5>Actividades</h5><ul>${li(cv.act)}</ul></div></div>
+    <div class="step"><div class="marker"><span></span></div><div><h5>Productos</h5><ul>${li(cv.pro)}</ul></div></div>
+    <div class="step"><div class="marker"><span></span></div><div><h5>Resultado a mediano plazo</h5><p>${cv.res}</p></div></div>
+    <div class="step"><div class="marker"><span></span></div><div><h5>Impacto a largo plazo</h5><p>${cv.imp}</p></div></div>`;
+  scrim.classList.add("on"); drawerOpen=true;
+  gsap.to(scrim,{opacity:1,duration:.3*D});
+  gsap.to(drawer,{x:0,duration:.55*D,ease:"power4.out"});
+  gsap.from(drawer.querySelectorAll(".d-body > *, .step"),{y:16,opacity:0,duration:.45*D,stagger:.035*D,ease:"power2.out",delay:.12*D});
+  document.getElementById("close").focus();
+}
+function closeDrawer(){
+  if(!drawerOpen) return;
+  drawerOpen=false; scrim.classList.remove("on");
+  gsap.to(scrim,{opacity:0,duration:.3*D});
+  gsap.to(drawer,{x:"100%",duration:.4*D,ease:"power3.in"});
+  if(lastFocused) lastFocused.focus();
+}
+document.getElementById("close").addEventListener("click",closeDrawer);
+scrim.addEventListener("click",closeDrawer);
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeDrawer(); });
+
+/* ============ CADENA DE VALOR ============ */
+const cvbody = document.getElementById("cvbody");
+const ARROW = `<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 1l4 4-4 4"/></svg>`;
+EJES.forEach(e=>{
+  const cv = CADENA[e.n];
+  const list = a => `<ul>${a.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+  const arrows = [1,2,3,4].map(k=>
+    `<div class="cv-arrow" style="left:calc((100% - 56px)/5*${k} + ${k*14 - 7}px - 7px)">${ARROW}</div>`).join("");
+  const sec = document.createElement("section");
+  sec.className = "cv-eje"; sec.dataset.eje = e.n; sec.style.setProperty("--hue", e.hue);
+  sec.innerHTML = `
+    <div class="cv-top"><span class="cv-num">EJE ${String(e.n).padStart(2,"0")}</span><span class="cv-name">${e.name}</span></div>
+    <p class="cv-obj">${cv.obj}</p>
+    <div class="cv-flow">
+      <div class="cv-box"><h6>Insumos</h6>${list(cv.ins)}</div>
+      <div class="cv-box"><h6>Actividades</h6>${list(cv.act)}</div>
+      <div class="cv-box"><h6>Productos</h6>${list(cv.pro)}</div>
+      <div class="cv-box end"><h6>Resultado · mediano plazo</h6><p>${cv.res}</p></div>
+      <div class="cv-box end"><h6>Impacto · largo plazo</h6><p>${cv.imp}</p></div>
+      ${arrows}
+    </div>`;
+  cvbody.appendChild(sec);
+});
+
+/* revelado progresivo al hacer scroll */
+if(!RM && "IntersectionObserver" in window){
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+      if(!en.isIntersecting || en.target._seen) return;
+      en.target._seen = true;
+      gsap.from(en.target.querySelectorAll(".cv-top, .cv-obj"),{y:14,opacity:0,duration:.5,stagger:.06,ease:"power3.out"});
+      gsap.from(en.target.querySelectorAll(".cv-box"),{y:20,opacity:0,duration:.55,stagger:.07,ease:"power3.out",delay:.1});
+      gsap.from(en.target.querySelectorAll(".cv-arrow"),{scale:0,opacity:0,duration:.4,stagger:.07,ease:"back.out(2)",delay:.3});
+    });
+  },{threshold:.15});
+  cvbody.querySelectorAll(".cv-eje").forEach(s=>io.observe(s));
+}
+
+/* ============ PESTAÑAS DE VISTA ============ */
+let view = "tree";
+const vTabs = [...document.querySelectorAll("#views button")];
+const vline = document.getElementById("vline");
+const treeView = document.getElementById("treeview"), chainView = document.getElementById("chainview");
+function placeLine(){
+  const b = vTabs.find(x=>x.getAttribute("aria-selected")==="true");
+  gsap.set(vline,{width:b.offsetWidth,x:b.offsetLeft});
+}
+window.addEventListener("resize", placeLine);
+
+vTabs.forEach(b=>b.addEventListener("click",()=>{
+  if(b.dataset.view===view) return;
+  view = b.dataset.view;
+  vTabs.forEach(x=>x.setAttribute("aria-selected", String(x.dataset.view===view)));
+  gsap.to(vline,{width:b.offsetWidth,x:b.offsetLeft,duration:.45*D,ease:"power3.inOut"});
+  gsap.to(document.getElementById("switch"),{opacity:view==="tree"?1:0,duration:.3*D,
+    onComplete:()=>{document.getElementById("switch").style.visibility = view==="tree"?"visible":"hidden";}});
+  if(view==="tree"){ document.getElementById("switch").style.visibility="visible"; }
+
+  const out = view==="tree" ? chainView : treeView;
+  const inn = view==="tree" ? treeView : chainView;
+  gsap.to(out,{opacity:0,y:-10,duration:.25*D,ease:"power2.in",onComplete:()=>{
+    out.style.display="none"; inn.style.display="block";
+    gsap.fromTo(inn,{opacity:0,y:12},{opacity:1,y:0,duration:.45*D,ease:"power3.out"});
+    if(view==="chain"){
+      gsap.from(".cv-legend div",{y:10,opacity:0,duration:.4*D,stagger:.05*D,ease:"power2.out"});
+      cvbody.querySelectorAll(".cv-eje").forEach(s=>{ if(!s._seen){ s._seen=true;
+        gsap.from(s.querySelectorAll(".cv-box"),{y:18,opacity:0,duration:.5*D,stagger:.05*D,ease:"power3.out"}); }});
+    }
+  }});
+}));
+
+/* ============ ENTRADA ============ */
+placeThumb(); placeLine();
+const intro = gsap.timeline({defaults:{ease:"power3.out"}});
+intro.from(".eyebrow",{y:12,opacity:0,duration:.5*D})
+     .from("h1",{y:20,opacity:0,duration:.7*D},"-=0.3")
+     .from(".lede, .switch, .ejes, .hint, .views",{y:14,opacity:0,duration:.5*D,stagger:.06*D},"-=0.4")
+     .from(".tier-head",{opacity:0,x:-10,duration:.4*D,stagger:.05*D},"-=0.3")
+     .from(".tier[data-tier='i-up'] .card",{y:18,opacity:0,duration:.5*D,stagger:.04*D},"-=0.2")
+     .from(".tier[data-tier='d-up'] .card",{y:18,opacity:0,duration:.5*D,stagger:.04*D},"-=0.35")
+     .fromTo(".tier[data-tier='i-up'] .link i, .tier[data-tier='d-up'] .link i",{scaleY:0},{scaleY:1,duration:.4*D,stagger:.03*D},"-=0.5")
+     .from(".trunk",{scaleX:.94,opacity:0,duration:.6*D,transformOrigin:"left center"},"-=0.25")
+     .from(".trunk p",{y:18,opacity:0,duration:.6*D},"-=0.4")
+     .fromTo(".trunk .bar",{scaleX:0},{scaleX:1,duration:.7*D},"-=0.6")
+     .from(".tier[data-tier='d-dn'] .card",{y:-18,opacity:0,duration:.5*D,stagger:.04*D},"-=0.45")
+     .from(".tier[data-tier='i-dn'] .card",{y:-18,opacity:0,duration:.5*D,stagger:.04*D},"-=0.35")
+     .fromTo(".tier[data-tier='d-dn'] .link i, .tier[data-tier='i-dn'] .link i",{scaleY:0},{scaleY:1,duration:.4*D,stagger:.03*D,transformOrigin:"bottom center"},"-=0.5");
+gsap.set(drawer,{x:"100%"});
+</script>
