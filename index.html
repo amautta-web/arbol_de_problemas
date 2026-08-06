@@ -591,7 +591,6 @@ const cvgen = document.createElement("div");
 cvgen.className = "cvgen";
 cvgen.innerHTML = `<div class="tag"><span class="bar"></span><span>Objetivo general</span><span class="bar"></span></div>
   <p>${CV_GEN}</p>
-  <div class="imp"><b>Indicador de impacto</b>${CV_IMP}</div>`;
 cvinner.appendChild(cvgen);
 
 /* encabezado de etapas */
@@ -619,7 +618,6 @@ CADENA.forEach(cv=>{
       <button class="cvbox outcome" data-k="res"><span class="st">Resultado · mediano plazo</span><p>${cv.res}</p></button>
       <button class="cvbox outcome" data-k="imp"><span class="st">Impacto · largo plazo</span><p>${cv.imp}</p></button>
     </div>
-    ${cv.ind ? `<div class="cvind"><span class="lb">Indicador de resultado</span><span class="vl">${cv.ind}</span></div>` : ""}`;
   sec.querySelectorAll(".cvbox").forEach(b=>{
     b.addEventListener("click", ev=>{ ev.stopPropagation(); activarEje(cv.e, sec); });
   });
