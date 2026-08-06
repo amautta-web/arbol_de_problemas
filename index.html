@@ -163,7 +163,7 @@ svg.trace circle{fill:var(--trace)}
   color:var(--ink-faint);border-bottom:1px solid var(--rule);padding-bottom:9px;text-align:center
 }
 .cvhead div b{display:block;color:var(--accent);font-weight:400;margin-bottom:4px;font-size:10px}
-.cveje{border-top:1px solid var(--rule);padding:26px 0 8px;transition:opacity .4s}
+.cveje{border-top:1px solid var(--rule);padding:30px 0 26px;transition:opacity .4s}
 .cveje:first-of-type{border-top:0}
 .cveje.mute{opacity:.13}
 .cvtop{margin-bottom:6px}
@@ -204,19 +204,8 @@ svg.trace circle{fill:var(--trace)}
 .cvbox.mute{opacity:.14}
 .cvbox.mute:hover{transform:none;box-shadow:none;border-color:var(--rule)}
 .cvbox.on{border-color:var(--ink);box-shadow:0 14px 34px -18px rgba(22,34,31,.75);z-index:4}
-.cvind{
-  margin:var(--gap) auto 0;max-width:1100px;border:1px dashed var(--rule);border-radius:3px;padding:13px 16px;
-  display:flex;gap:14px;align-items:baseline;justify-content:center;flex-wrap:wrap;
-  transition:opacity .4s
-}
-.cvind .lb{
-  font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.15em;
-  text-transform:uppercase;color:var(--ink-faint);flex-shrink:0
-}
-.cvind .vl{font-size:12.8px;color:var(--ink-soft);max-width:88ch;text-align:center}
-.cvind.mute{opacity:.13}
 .cvgen{
-  background:var(--ink);color:var(--surface);border-radius:4px;padding:28px 34px;margin:26px 0 4px;
+  background:var(--ink);color:var(--surface);border-radius:4px;padding:30px 34px;margin:26px 0 4px;
   position:relative;overflow:hidden;transition:opacity .4s
 }
 .cvgen::after{content:"";position:absolute;inset:0;pointer-events:none;
@@ -228,15 +217,6 @@ svg.trace circle{fill:var(--trace)}
 .cvgen .tag .bar{height:1px;width:110px;background:rgba(184,134,47,.4)}
 .cvgen p{margin:0 auto;font-family:"Newsreader",Georgia,serif;font-weight:300;
   font-size:clamp(18px,2.2vw,27px);line-height:1.3;max-width:44ch;position:relative;z-index:2}
-.cvgen .imp{
-  margin:18px auto 0;padding-top:16px;border-top:1px solid rgba(247,248,244,.16);
-  font-family:"Instrument Sans",sans-serif;font-size:12.6px;line-height:1.5;
-  color:rgba(247,248,244,.72);max-width:80ch;position:relative;z-index:2;text-align:center
-}
-.cvgen .imp b{
-  display:block;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.15em;
-  text-transform:uppercase;color:var(--trace);font-weight:400;margin-bottom:6px
-}
 .cvgen.mute{opacity:.3}
 @media (max-width:1000px){
   .cvhead{display:none}
@@ -495,9 +475,7 @@ function activate(n){
       const p0 = path.getPointAtLength(0);
       dot.setAttribute("cx",p0.x); dot.setAttribute("cy",p0.y);
 
-      ubicarLinea();
-
-  const tl = gsap.timeline({delay:i*.12*D});
+      const tl = gsap.timeline({delay:i*.12*D});
       tl.to(path,{strokeDashoffset:0, duration:.85*D, ease:"power2.inOut"},0)
         .to({t:0},{t:1, duration:.85*D, ease:"power2.inOut", onUpdate(){
             const p = path.getPointAtLength(this.targets()[0].t*len);
@@ -518,7 +496,6 @@ window.addEventListener("resize", reset);
 
 /* ============ CADENA DE VALOR ============ */
 const CV_GEN = "Fortalecer las condiciones de protección, cuidado y bienestar económico de las personas mayores mediante una respuesta institucional e intersectorial articulada, para favorecer un envejecimiento digno y saludable en Medellín.";
-const CV_IMP = "Porcentaje o número de personas mayores con condiciones favorables de protección, cuidado y bienestar económico.";
 
 const ETAPAS = [
   {k:"ins", num:"01", name:"Insumos",   nota:"Componentes humanos, materiales, financieros, de infraestructura y tecnológicos."},
@@ -535,8 +512,7 @@ const CADENA = [
  act:["Articular la oferta institucional relacionada con oportunidades económicas, inclusión productiva y protección social","Desarrollar procesos de formación y fortalecimiento de capacidades para el trabajo y el emprendimiento","Orientar y acompañar a las personas mayores en el acceso a oportunidades laborales, productivas y de generación de ingresos","Focalizar y canalizar apoyos y mecanismos de protección para personas mayores en condiciones de vulnerabilidad","Promover alianzas con actores públicos y privados para ampliar oportunidades de inclusión económica","Implementar estrategias de reconocimiento a organizaciones que favorezcan la inclusión laboral y productiva (Ley 2040 de 2020)"],
  pro:["Personas mayores formadas para el desarrollo de capacidades laborales y productivas","Servicios de orientación y acompañamiento laboral y productivo implementados","Iniciativas productivas de personas mayores acompañadas","Personas mayores con acceso a mecanismos de protección social y apoyo económico","Alianzas institucionales para la inclusión económica formalizadas","Estrategia de reconocimiento a organizaciones promotoras de inclusión laboral implementada (sello amigable, Ley 2040 de 2020)"],
  res:"Mayor acceso de las personas mayores a oportunidades económicas, productivas y de protección social acordes con sus capacidades, necesidades y condiciones.",
- imp:"Mejora de las condiciones de bienestar económico de las personas mayores y reducción de las brechas que limitan su autonomía y calidad de vida.",
- ind:"Porcentaje de personas mayores beneficiarias de estrategias de bienestar económico, inclusión productiva o mecanismos de protección social."},
+ imp:"Mejora de las condiciones de bienestar económico de las personas mayores y reducción de las brechas que limitan su autonomía y calidad de vida."},
 
 {e:2, name:"Participación e incidencia de las personas mayores",
  obj:"Fomentar la participación social, comunitaria y ciudadana de las personas mayores, promoviendo su incidencia, organización, liderazgo y reconocimiento en los territorios.",
@@ -544,8 +520,7 @@ const CADENA = [
  act:["Acompañar y fortalecer los escenarios de participación de personas mayores","Desarrollar procesos de formación en liderazgo, participación ciudadana y representación","Articular los escenarios de personas mayores con otras instancias de participación del Distrito","Fortalecer procesos organizativos y redes comunitarias","Sensibilizar actores institucionales y comunitarios sobre la participación e incidencia de las personas mayores"],
  pro:["Escenarios de participación acompañados y fortalecidos","Personas mayores formadas en liderazgo y participación ciudadana","Procesos de articulación entre escenarios de participación desarrollados","Organizaciones y redes de personas mayores acompañadas"],
  res:"Mayor capacidad de las personas mayores para participar, representar sus intereses e incidir en escenarios institucionales y comunitarios.",
- imp:"Mayor reconocimiento e incidencia de las personas mayores en las decisiones y procesos que afectan su bienestar y el desarrollo de la ciudad.",
- ind:"Porcentaje o número de personas mayores que participan en escenarios de participación ciudadana e institucionales."},
+ imp:"Mayor reconocimiento e incidencia de las personas mayores en las decisiones y procesos que afectan su bienestar y el desarrollo de la ciudad."},
 
 {e:3, name:"Protección y redes de apoyo",
  obj:"Fortalecer la protección de las personas mayores frente a las violencias, el abandono y la vulneración de derechos mediante la articulación de acciones de promoción, prevención y apoyos al cuidado, promoviendo la corresponsabilidad institucional, familiar y comunitaria.",
@@ -553,8 +528,7 @@ const CADENA = [
  act:["Formar al talento humano en prevención, detección y atención de violencias contra personas mayores","Fortalecer la coordinación interinstitucional para la activación y seguimiento de rutas","Mejorar los mecanismos de registro, intercambio y análisis de información","Acompañar y fortalecer redes familiares, comunitarias e institucionales de apoyo","Realizar seguimiento a entidades públicas y privadas que prestan servicios a personas mayores","Desarrollar acciones de sensibilización y promoción del buen trato","Brindar orientación psicosocial y jurídica frente a situaciones de vulneración","Promover encuentros intergeneracionales orientados al reconocimiento y la protección"],
  pro:["Talento humano formado en prevención y atención de violencias","Rutas y protocolos de atención actualizados y articulados","Estrategias de prevención y buen trato implementadas","Personas mayores orientadas y atendidas frente a situaciones de vulneración","Redes familiares, comunitarias e institucionales acompañadas","Mecanismo de información y seguimiento sobre violencias fortalecido","Servicios de acompañamiento psicosocial y jurídico prestados","Encuentros intergeneracionales desarrollados"],
  res:"Mayor capacidad de las familias, comunidades e instituciones para prevenir, identificar, atender y hacer seguimiento a situaciones de violencia, abandono y vulneración de derechos de las personas mayores.",
- imp:"Mejores condiciones de protección y entornos de apoyo para las personas mayores, con menor exposición a violencias, abandono y vulneración de derechos.",
- ind:"Porcentaje o número de personas mayores identificadas con situaciones de vulneración de derechos o violencia que reciben atención y seguimiento de acuerdo con las rutas institucionales establecidas."},
+ imp:"Mejores condiciones de protección y entornos de apoyo para las personas mayores, con menor exposición a violencias, abandono y vulneración de derechos."},
 
 {e:4, name:"Salud y cuidado en la vejez",
  obj:"Fortalecer las acciones de promoción de la salud, prevención de la enfermedad, atención a la dependencia y cuidado integral de las personas mayores, impulsando la corresponsabilidad social y condiciones que favorezcan el bienestar, la autonomía, la funcionalidad y el envejecimiento saludable.",
@@ -562,8 +536,7 @@ const CADENA = [
  act:["Articular las acciones de promoción de la salud, prevención de la enfermedad y fortalecimiento del cuidado","Desarrollar jornadas de promoción de la salud y prevención de la enfermedad enfocadas en personas mayores","Desarrollar procesos formativos en cuidado, autocuidado y corresponsabilidad","Fortalecer redes familiares y comunitarias de cuidado","Orientar a personas mayores y cuidadores sobre la oferta disponible","Coordinar respuestas institucionales frente a necesidades de salud y cuidado"],
  pro:["Estrategias de promoción de la salud implementadas","Acciones de prevención de la enfermedad desarrolladas","Personas mayores y cuidadores formados en cuidado y autocuidado","Redes de cuidado acompañadas y fortalecidas","Mecanismos de orientación y acceso a la oferta y al cuidado implementados"],
  res:"Mayor acceso de las personas mayores a acciones de promoción de la salud, prevención y apoyos al cuidado, con una mejor articulación entre los actores responsables.",
- imp:"Mejores condiciones de salud, cuidado y bienestar de las personas mayores, con mayor capacidad de respuesta frente a sus necesidades de apoyo y cuidado.",
- ind:"Porcentaje o número de personas que acceden a acciones de promoción de la salud, prevención de la enfermedad, atención y cuidado para favorecer un envejecimiento saludable."},
+ imp:"Mejores condiciones de salud, cuidado y bienestar de las personas mayores, con mayor capacidad de respuesta frente a sus necesidades de apoyo y cuidado."},
 
 {e:5, name:"Curso de vida y envejecimiento saludable",
  obj:"Mejorar la efectividad de las intervenciones orientadas al envejecimiento saludable y digno desde un enfoque de curso de vida, mediante la articulación intersectorial.",
@@ -571,8 +544,7 @@ const CADENA = [
  act:["Articular la oferta institucional e intersectorial relacionada con envejecimiento saludable","Desarrollar acciones de actividad física, deporte y recreación con enfoque de curso de vida","Implementar estrategias de hábitos, modos y estilos de vida saludables","Desarrollar acciones para favorecer entornos amigables con el envejecimiento","Incorporar el enfoque de curso de vida en las intervenciones institucionales relacionadas con envejecimiento","Fortalecer capacidades institucionales para responder al cambio demográfico"],
  pro:["Estrategia de articulación intersectorial para el envejecimiento saludable implementada","Estrategias de actividad física, deporte y recreación desarrolladas","Estrategias de hábitos y estilos de vida saludables implementadas","Acciones para el desarrollo de entornos amigables ejecutadas"],
  res:"Mayor cobertura, continuidad, articulación y seguimiento de las intervenciones dirigidas al envejecimiento saludable.",
- imp:"Mejores condiciones para un envejecimiento digno y saludable.",
- ind:null},
+ imp:"Mejores condiciones para un envejecimiento digno y saludable."},
 
 {e:6, name:"Gestión del conocimiento y formación",
  obj:"Promover la articulación de procesos de formación, investigación, innovación y gestión del conocimiento sobre envejecimiento y vejez, para el fortalecimiento de capacidades institucionales, técnicas, comunitarias y digitales frente a los retos del envejecimiento poblacional.",
@@ -580,8 +552,7 @@ const CADENA = [
  act:["Desarrollar procesos de formación sobre envejecimiento y vejez","Promover investigaciones y estudios especializados","Generar y sistematizar información para la toma de decisiones","Desarrollar procesos de alfabetización e inclusión digital","Realizar encuentros académicos y espacios de transferencia de conocimiento","Fortalecer las capacidades técnicas del talento humano","Fortalecer sistemas de información y observación sobre envejecimiento y vejez"],
  pro:["Procesos formativos desarrollados","Estudios e investigaciones realizados","Publicaciones técnicas y documentos de conocimiento generados","Personas mayores vinculadas a procesos de alfabetización e inclusión digital","Encuentros académicos y de transferencia de conocimiento realizados","Sistema de información y observación sobre envejecimiento y vejez fortalecido","Iniciativas de innovación relacionadas con envejecimiento desarrolladas"],
  res:"Fortalecimiento de capacidades técnicas, de formación, investigativas y digitales para generar, compartir y utilizar conocimiento sobre envejecimiento y vejez.",
- imp:"Mayor capacidad institucional y social para responder a los desafíos del envejecimiento poblacional.",
- ind:"Porcentaje de estrategias implementadas de gestión del conocimiento, innovación y transformación digital adoptadas por las entidades para fortalecer la respuesta institucional frente al envejecimiento y la vejez."}
+ imp:"Mayor capacidad institucional y social para responder a los desafíos del envejecimiento poblacional."}
 ];
 
 const cvinner = document.getElementById("cvinner");
@@ -590,7 +561,7 @@ const cvinner = document.getElementById("cvinner");
 const cvgen = document.createElement("div");
 cvgen.className = "cvgen";
 cvgen.innerHTML = `<div class="tag"><span class="bar"></span><span>Objetivo general</span><span class="bar"></span></div>
-  <p>${CV_GEN}</p>
+  <p>${CV_GEN}</p>`;
 cvinner.appendChild(cvgen);
 
 /* encabezado de etapas */
@@ -617,7 +588,7 @@ CADENA.forEach(cv=>{
       <button class="cvbox" data-k="pro"><span class="st">Productos</span>${li(cv.pro)}</button>
       <button class="cvbox outcome" data-k="res"><span class="st">Resultado · mediano plazo</span><p>${cv.res}</p></button>
       <button class="cvbox outcome" data-k="imp"><span class="st">Impacto · largo plazo</span><p>${cv.imp}</p></button>
-    </div>
+    </div>`;
   sec.querySelectorAll(".cvbox").forEach(b=>{
     b.addEventListener("click", ev=>{ ev.stopPropagation(); activarEje(cv.e, sec); });
   });
@@ -642,7 +613,6 @@ function cvReset(){
     b.classList.remove("mute","on");
     gsap.set(b,{clearProps:"transform,scale"});
   });
-  cvinner.querySelectorAll(".cvind").forEach(i=>i.classList.remove("mute"));
   cvgen.classList.remove("mute");
 }
 
@@ -652,7 +622,6 @@ function activarEje(e, sec){
   cvActive = e;
 
   cvinner.querySelectorAll(".cveje").forEach(s=>s.classList.toggle("mute", s !== sec));
-  cvinner.querySelectorAll(".cvind").forEach(i=>i.classList.toggle("mute", !sec.contains(i)));
   cvgen.classList.add("mute");
   const cajas = [...sec.querySelectorAll(".cvbox")];
   cajas[0].classList.add("on");
